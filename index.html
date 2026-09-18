@@ -11,6 +11,19 @@
   <a class="skip" href="#about">Skip to content</a>
   <div class="page">
     <aside class="sidebar">
+      <input type="checkbox" id="nav-toggle" class="nav-toggle">
+      <div class="mobile-bar">
+        <label for="nav-toggle" class="menu-btn" aria-expanded="false">
+          <svg class="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+          <span class="visually-hidden">Menu</span>
+        </label>
+        <span class="mobile-bar-name">Garvita Allabadi</span>
+      </div>
       <img class="portrait" src="images/Garvita_Allabadi.jpg" alt="Picture of Garvita Allabadi">
       <div class="brand">
         <h1>Garvita Allabadi</h1>
@@ -365,5 +378,62 @@
       <p class="footer">Last updated September 2026.</p>
     </main>
   </div>
+  <script>
+    function isPhoneNav() {
+      return window.matchMedia('(max-width: 48em)').matches;
+    }
+
+    function scrollPastHeader(el, smooth) {
+      var bar = document.querySelector('.mobile-bar');
+      var offset = bar && isPhoneNav() ? bar.getBoundingClientRect().height : 0;
+      var top = window.scrollY + el.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' });
+    }
+
+    function updateCompactHeader() {
+      if (!isPhoneNav()) {
+        document.body.classList.remove('header-compact');
+        return;
+      }
+      document.body.classList.toggle('header-compact', window.scrollY > 24);
+    }
+
+    document.getElementById('nav-toggle')?.addEventListener('change', function () {
+      document.querySelector('.menu-btn')?.setAttribute('aria-expanded', this.checked ? 'true' : 'false');
+    });
+
+    document.querySelectorAll('.sidebar-links a').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var toggle = document.getElementById('nav-toggle');
+        var href = this.getAttribute('href') || '';
+        var target = href.charAt(0) === '#' ? document.querySelector(href) : null;
+
+        if (toggle) toggle.checked = false;
+        document.querySelector('.menu-btn')?.setAttribute('aria-expanded', 'false');
+
+        if (!target || !isPhoneNav()) return;
+
+        e.preventDefault();
+        window.setTimeout(function () {
+          scrollPastHeader(target, true);
+          if (history.replaceState) history.replaceState(null, '', href);
+        }, 50);
+      });
+    });
+
+    window.addEventListener('scroll', updateCompactHeader, { passive: true });
+    window.addEventListener('resize', updateCompactHeader);
+    updateCompactHeader();
+
+    if (isPhoneNav() && location.hash) {
+      var initial = document.querySelector(location.hash);
+      if (initial) {
+        window.addEventListener('load', function () {
+          scrollPastHeader(initial, false);
+          updateCompactHeader();
+        });
+      }
+    }
+  </script>
 </body>
 </html>
